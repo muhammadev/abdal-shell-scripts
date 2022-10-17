@@ -10,7 +10,7 @@ function ctrl_c() {
 }
 trap ctrl_c INT;
 
-if [ $1 ] && [ `git branch --list "$1"` ];
+if [ $1 ] && [[ `git branch --list "$1"` ]];
 then
   # second, checkout the latest version of dev/phase-two
   git checkout dev/phase-two && git pull origin dev/phase-two;
