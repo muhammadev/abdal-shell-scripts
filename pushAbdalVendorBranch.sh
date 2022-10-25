@@ -15,8 +15,8 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
 fi
 
 # option --output/-o requires 1 argument
-LONGOPTS=pull
-OPTIONS=p
+LONGOPTS=pull,commit
+OPTIONS=pc
 
 # -regarding ! and PIPESTATUS see above
 # -temporarily store output to be able to check for errors
@@ -31,12 +31,16 @@ fi
 # read getopt’s output this way to handle the quoting right:
 eval set -- "$PARSED"
 
-p=n
+p=n c=n
 # now enjoy the options in order and nicely split until we see --
 while true; do
   case "$1" in
   -p | --pull)
     p=y
+    shift
+    ;;
+  -c | --commit)
+    c=y
     shift
     ;;
   --)
@@ -74,31 +78,46 @@ trap ctrl_c INT
 
 if [ $1 ] && [[ $(git branch --list "$1") ]]; then
 
-  if [[ $p = y ]]; then
+  # switch webpack.mix.js file to original
+  git restore "C:\laragon\www\abdal\webpack.mix.js"
+  echo -e "\n >>> switch webpack.mix.js file to original \n"
 
-    # checkout the latest version of dev/phase-two
-    git checkout dev/phase-two && git pull origin dev/phase-two
-    echo -e "\n >>> Pull changes from dev/phase-two branch \n"
+  if [[ $c = y ]]; then
+    if [[ $(git diff --exit-code) ]]; then
+      # git add changes
+      git add .
 
-    # checkout the latest version of dev/front-end and merge it with the latest version of dev/phase-two
-    # and then merge new changes to $1 branch
-    git checkout dev/front-end && git pull origin dev/front-end && git merge dev/phase-two
-    git checkout $1 && git merge dev/front-end
-    echo -e "\n >>> Pull changes from dev/front-end branch and merge dev/phase-two, then merge new changes to $1 \n"
+      # git commit changes
+      echo -e "\n >>> Enter a commit message for your changes:"
+      read commitMessage
+      git commit -m "$commitMessage"
+    else
+      echo -e "\n >>> nothing to commit here \n"
+    fi
   else
-    echo -e "\n >>> not pulling... \n"
+    echo -e "\n >>> proceeding without add & commit... \n"
   fi
 
-  # switch webpack.mix.js file to mixConfigBusiness file which will comment out "website" and "vendor" sections
-  cp "$basePath\mixConfigBusiness.txt" "C:\laragon\www\abdal\webpack.mix.js"
-  echo -e "\n >>> switch webpack.mix.js file to mixConfigBusiness file which will comment out 'website' and 'vendor' sections \n"
+  if [[ $p = y ]]; then
+    # checkout the latest version of dev/vendor
+    git checkout dev/vendor && git pull origin dev/vendor
+    echo -e "\n >>> Pull changes from dev/vendor branch \n"
 
-  # open vs code
-  echo -e "\n >>> opening code... \n"
-  code .
+    # checkout the latest version of dev/vendor-front and merge it with the latest version of dev/vendor
+    # and then merge new changes to $1 branch
+    git checkout dev/vendor-front && git pull origin dev/vendor-front && git merge dev/vendor
+    git checkout $1 && git merge dev/vendor-front
+    echo -e "\n >>> Pull changes from dev/vendor-front branch and merge dev/vendor, then merge new changes to $1 \n"
+  else
+    echo -e "\n >>> proceeding without pulling from higher branches... \n"
+  fi
 
-  # run npm watch command to start the development server
-  npm run watch
+  # push changes to $1 branch
+  {
+    git push origin $1 && echo -e "\n 📦 Changes have been pushed to $1 branch successfully. \n"
+  } || {
+    echo -e "\n >>> something went wrong! Please check if push command failed. \n"
+  }
 else
   echo -e "\n >>> branch not provided or not found \n"
 fi

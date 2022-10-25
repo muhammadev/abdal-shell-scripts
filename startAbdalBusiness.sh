@@ -74,12 +74,21 @@ trap ctrl_c INT
 
 if [[ $p = y ]]; then
     # checkout the latest version of dev/phase-two
-    git checkout dev/phase-two && git pull origin dev/phase-two
-    echo -e "\n >>> Pull changes from dev/phase-two branch \n"
+    {
+        git checkout dev/phase-two && git pull origin dev/phase-two && echo -e "\n >>> Pull changes from dev/phase-two branch \n"
+    } || {
+        echo -e "\n >>> something went wrong!"
+        read -p "Press enter to continue..."
+    }
 
     # checkout the latest version of dev/front-end and merge with it the latest version of dev/phase-two
-    git checkout dev/front-end && git pull origin dev/front-end && git merge dev/phase-two
-    echo -e "\n >>> Pull changes from dev/front-end branch and merge dev/phase-two \n"
+    {
+        git checkout dev/front-end && git pull origin dev/front-end && git merge dev/phase-two && echo -e "\n >>> Pull changes from dev/front-end branch and merge dev/phase-two \n"
+    } || {
+        echo -e "\n >>> something went wrong!"
+        read -p "Press enter to continue..."
+
+    }
 else
     echo -e "\n >>> not pulling... \n"
 fi

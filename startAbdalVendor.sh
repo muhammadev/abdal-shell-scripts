@@ -74,12 +74,19 @@ function ctrl_c() {
 
 if [[ $p = y ]]; then
     # checkout the latest version of dev/vendor
-    git checkout dev/vendor && git pull origin dev/vendor
-    echo -e "\n >>> Pull changes from dev/vendor branch \n"
-
+    {
+        git checkout dev/vendor && git pull origin dev/vendor && echo -e "\n >>> Pulled changes from dev/vendor branch \n"
+    } || {
+        echo -e "\n >>> something went wrong!"
+        read -p "Press enter to continue..."
+    }
     # checkout the latest version of dev/vendor-front and merge it with the latest version of dev/vendor
-    git checkout dev/vendor-front && git pull origin dev/vendor-front && git merge dev/vendor
-    echo -e "\n >>> Pull changes from dev/vendor-front and merge changes from dev/vendor branch to dev/vendor-front branch \n"
+    {
+        git checkout dev/vendor-front && git pull origin dev/vendor-front && git merge dev/vendor && echo -e "\n >>> Pull changes from dev/vendor-front and merge changes from dev/vendor branch to dev/vendor-front branch \n"
+    } || {
+        echo -e "\n >>> something went wrong!"
+        read -p "Press enter to continue..."
+    }
 else
     echo -e "\n >>> not pulling... \n"
 fi
