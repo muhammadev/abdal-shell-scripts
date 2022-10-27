@@ -18,15 +18,21 @@ git restore "C:\laragon\www\abdal\webpack.mix.js"
 
 echo "************ Restore mix config file back to original ************"
 
-# git add changes
-git add .
+if [[ $(git diff --exit-code) ]]; then
+    # git add changes
+    git add .
+else
+    echo -e "\n >>> no unstaged changes found \n"
+fi
 
-# git commit changes
-echo ">>> Enter a commit message for your changes."
-read commitMessage
-git commit -m "$commitMessage"
-
-echo "************ Commit changes ************"
+if [[ $(git diff --cached --exit-code) ]]; then
+    # git commit changes
+    echo -e "\n >>> Enter a commit message for your changes:"
+    read commitMessage
+    git commit -m "$commitMessage"
+else
+    echo -e "\n >>> no changes to be committed \n"
+fi
 
 # pull changes from dev/vendor branch
 git checkout dev/vendor && git pull origin dev/vendor

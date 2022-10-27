@@ -86,13 +86,17 @@ if [ $1 ] && [[ $(git branch --list "$1") ]]; then
     if [[ $(git diff --exit-code) ]]; then
       # git add changes
       git add .
+    else
+      echo -e "\n >>> no unstaged changes found \n"
+    fi
 
+    if [[ $(git diff --cached --exit-code) ]]; then
       # git commit changes
       echo -e "\n >>> Enter a commit message for your changes:"
       read commitMessage
       git commit -m "$commitMessage"
     else
-      echo -e "\n >>> nothing to commit here \n"
+      echo -e "\n >>> no changes to be committed \n"
     fi
   else
     echo -e "\n >>> proceeding without add & commit... \n"

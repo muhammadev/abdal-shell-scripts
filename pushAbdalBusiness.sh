@@ -8,13 +8,21 @@ cd C:/laragon/www/abdal
 # restore mix config file back to original
 git restore "C:\laragon\www\abdal\webpack.mix.js"
 
-# git add changes
-git add .
+if [[ $(git diff --exit-code) ]]; then
+  # git add changes
+  git add .
+else
+  echo -e "\n >>> no unstaged changes found \n"
+fi
 
-# git commit changes
-echo ">>> Enter a commit message for your changes."
-read commitMessage
-git commit -m "$commitMessage"
+if [[ $(git diff --cached --exit-code) ]]; then
+  # git commit changes
+  echo -e "\n >>> Enter a commit message for your changes:"
+  read commitMessage
+  git commit -m "$commitMessage"
+else
+  echo -e "\n >>> no changes to be committed \n"
+fi
 
 # pull changes from dev/phase-two branch
 git checkout dev/phase-two && git pull origin dev/phase-two
